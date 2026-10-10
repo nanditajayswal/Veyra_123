@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VEYRA</string>
+    <string name="app_tagline">जोखिम को पहचानें। कारण समझें। अगला सुरक्षित कदम उठाएं।</string>
+    <string name="notification_service_label">VEYRA खतरा संसूचक</string>
+    <string name="channel_alerts_name">सुरक्षा चेतावनी अलर्ट</string>
+    <string name="channel_alerts_desc">नोटिफिकेशन में फ़िशिंग लिंक या धोखाधड़ी संदेश मिलने पर तत्काल चेतावनी</string>
+    <string name="channel_status_name">सुरक्षा सेवा स्थिति</string>
+    <string name="channel_status_desc">पृष्ठभूमि सुरक्षा स्थिति</string>
+    
+    <!-- Status Labels -->
+    <string name="status_protected">सक्रिय सुरक्षा चालू है</string>
+    <string name="status_permission_needed">सूचना अनुमति आवश्यक है</string>
+    <string name="status_paused">निगरानी रोक दी गई है</string>
+    <string name="status_incomplete">सुरक्षा जांच अधूरी है</string>
+
+    <!-- Risk Levels -->
+    <string name="risk_high">उच्च जोखिम (HIGH RISK)</string>
+    <string name="risk_suspicious">संदिग्ध (SUSPICIOUS)</string>
+    <string name="risk_low">कम जोखिम संकेत (LOW RISK)</string>
+    <string name="risk_safe">कोई ज्ञात खतरा नहीं मिला</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">डैशबोर्ड</string>
+    <string name="nav_scan">स्कैन केंद्र</string>
+    <string name="nav_findings">खोज परिणाम</string>
+    <string name="nav_checkup">सुरक्षा जांच</string>
+    <string name="nav_recovery">घटना समाधान</string>
+    <string name="nav_admin">प्रशासक पोर्टल</string>
+    <string name="nav_settings">सेटिंग्स</string>
+
+    <!-- Actions -->
+    <string name="action_scan_now">अभी स्कैन करें</string>
+    <string name="action_enable_protection">सुरक्षा सक्षम करें</string>
+    <string name="action_view_evidence">सबूत देखें</string>
+    <string name="action_clear_history">इतिहास साफ़ करें</string>
+    <string name="action_call_1930">1930 साइबर हेल्पलाइन पर कॉल करें</string>
+</resources>

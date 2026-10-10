@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VEYRA</string>
+    <string name="app_tagline">Know What\'s Risky. Know Why. Know What to Do Next.</string>
+    <string name="notification_service_label">VEYRA Threat Detector</string>
+    <string name="channel_alerts_name">Security Threat Alerts</string>
+    <string name="channel_alerts_desc">Urgent alerts when phishing links or scam messages are detected in notifications</string>
+    <string name="channel_status_name">Protection Service Status</string>
+    <string name="channel_status_desc">Status of background notification protection</string>
+    
+    <!-- Status Labels -->
+    <string name="status_protected">Real-Time Protection Active</string>
+    <string name="status_permission_needed">Notification Access Required</string>
+    <string name="status_paused">Monitoring Paused</string>
+    <string name="status_incomplete">Security Check Incomplete</string>
+
+    <!-- Risk Levels -->
+    <string name="risk_high">HIGH RISK</string>
+    <string name="risk_suspicious">SUSPICIOUS</string>
+    <string name="risk_low">LOW RISK INDICATORS</string>
+    <string name="risk_safe">NO KNOWN THREAT DETECTED</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_scan">Scan Centre</string>
+    <string name="nav_findings">Findings</string>
+    <string name="nav_checkup">Safety Checkup</string>
+    <string name="nav_recovery">Incident Recovery</string>
+    <string name="nav_admin">Admin Portal</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Actions -->
+    <string name="action_scan_now">Scan Now</string>
+    <string name="action_enable_protection">Enable Protection</string>
+    <string name="action_view_evidence">View Evidence</string>
+    <string name="action_clear_history">Clear History</string>
+    <string name="action_call_1930">Call 1930 Cybercrime Helpline</string>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VEYRA</string>
+    <string name="app_tagline">જોખમ ઓળખો. કારણ સમજો. આગળનું સુરક્ષિત પગલું ભરો.</string>
+    <string name="notification_service_label">VEYRA જોખમ શોધક</string>
+    <string name="channel_alerts_name">સુરક્ષા ચેતવણી એલર્ટ</string>
+    <string name="channel_alerts_desc">નોટિફિકેશનમાં ફિશિંગ લિંક અથવા સ્કેમ મળવા પર તાત્કાલિક ચેતવણી</string>
+    <string name="channel_status_name">સુરક્ષા સેવા સ્થિતિ</string>
+    <string name="channel_status_desc">બેકગ્રાઉન્ડ સુરક્ષા સ્થિતિ</string>
+    
+    <!-- Status Labels -->
+    <string name="status_protected">વાસ્તવિક સમય સુરક્ષા સક્રિય છે</string>
+    <string name="status_permission_needed">નોટિફિકેશન પરવાનગી જરૂરી છે</string>
+    <string name="status_paused">મોનિટરિંગ સ્થગિત છે</string>
+    <string name="status_incomplete">સુરક્ષા તપાસ અધૂરી છે</string>
+
+    <!-- Risk Levels -->
+    <string name="risk_high">ઉચ્ચ જોખમ (HIGH RISK)</string>
+    <string name="risk_suspicious">શંકાસ્પદ (SUSPICIOUS)</string>
+    <string name="risk_low">ઓછું જોખમ (LOW RISK)</string>
+    <string name="risk_safe">કોઈ જાણીતો ખતરો મળ્યો નથી</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">ડેશબોર્ડ</string>
+    <string name="nav_scan">સ્કેન કેન્દ્ર</string>
+    <string name="nav_findings">શોધ પરિણામો</string>
+    <string name="nav_checkup">સુરક્ષા ચેકઅપ</string>
+    <string name="nav_recovery">ઘટના નિવારણ</string>
+    <string name="nav_admin">એડમિન પોર્ટલ</string>
+    <string name="nav_settings">સેટિંગ્સ</string>
+
+    <!-- Actions -->
+    <string name="action_scan_now">હમણાં સ્કેન કરો</string>
+    <string name="action_enable_protection">સુરક્ષા ચાલુ કરો</string>
+    <string name="action_view_evidence">પુરાવા જુઓ</string>
+    <string name="action_clear_history">ઇતિહાસ સાફ કરો</string>
+    <string name="action_call_1930">1930 સાયબર હેલ્પલાઇન પર કૉલ કરો</string>
+</resources>

@@ -1,0 +1,17 @@
+{
+  "name": "VEYRA — Personal Digital Safety Guardian",
+  "short_name": "VEYRA",
+  "description": "Know What's Risky. Know Why. Know What to Do Next.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0A1128",
+  "theme_color": "#101F42",
+  "icons": [
+    {
+      "src": "logo_veyra.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

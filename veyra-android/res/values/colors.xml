@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VEYRA Official Reference Palette -->
+    <color name="main_background">#EEF4FF</color>
+    <color name="secondary_background">#F6F2FF</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="navigation_background">#EAE8FF</color>
+    <color name="primary_accent">#16A6A0</color>
+    <color name="secondary_accent">#B7A7F7</color>
+    <color name="heading_text">#24304F</color>
+    <color name="body_text">#64748B</color>
+    <color name="success_safe">#DDF7E8</color>
+    <color name="warning">#FFF0CC</color>
+    <color name="danger_high_risk">#FFE1E5</color>
+    <color name="borders_dividers">#DCE5F2</color>
+
+    <!-- Compatibility mappings -->
+    <color name="primary">#16A6A0</color>
+    <color name="primary_dark">#24304F</color>
+    <color name="accent_teal">#16A6A0</color>
+    <color name="safe_mint">#16A6A0</color>
+    <color name="warning_amber">#D97706</color>
+    <color name="danger_coral">#DC2626</color>
+    <color name="background_dark">#EEF4FF</color>
+    <color name="card_dark">#FFFFFF</color>
+    <color name="text_primary">#24304F</color>
+    <color name="text_secondary">#64748B</color>
+</resources>

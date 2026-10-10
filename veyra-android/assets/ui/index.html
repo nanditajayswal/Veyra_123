@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VEYRA — On-Device Security Assistant</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="light">
+
+  <!-- ==========================================================================
+       GLOBAL APPLICATION HEADER
+       LEFT: Logo + Wordmark + Tagline
+       RIGHT: Language Selector (EN | हिंदी | ગુજરાતી) + Sun/Moon Toggle
+       ========================================================================== -->
+  <header class="app-header">
+    <div class="brand-wrapper" onclick="switchView('dashboard')">
+      <img src="logo_veyra.png" alt="VEYRA Official Logo" class="brand-logo-img">
+      <div class="brand-text">
+        <span class="brand-name">VEYRA</span>
+        <span class="brand-tagline" data-i18n="tagline">ON-DEVICE SECURITY</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Language Selector -->
+      <div class="lang-btn-group">
+        <button class="lang-btn active" id="lang-btn-en" onclick="setUiLanguage('en')">EN</button>
+        <button class="lang-btn" id="lang-btn-hi" onclick="setUiLanguage('hi')">हिंदी</button>
+        <button class="lang-btn" id="lang-btn-gu" onclick="setUiLanguage('gu')">ગુજરાતી</button>
+      </div>
+
+      <!-- Sun / Moon Appearance Toggle -->
+      <button class="theme-toggle-btn" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle Appearance">
+        <span id="theme-icon">☀️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       VIEW 1: REAL-TIME DASHBOARD (HOME)
+       7 Genuine Metric Cards + Protection Status + Recent Findings
+       ========================================================================== -->
+  <main class="view-container active" id="view-dashboard">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="dashboard_title">Security Overview</h1>
+      <p class="view-subtitle" data-i18n="dashboard_subtitle">Real-time on-device digital protection & genuine activity telemetry</p>
+    </div>
+
+    <!-- Protection Posture Hero Card -->
+    <div class="status-hero-card" id="hero-status-card">
+      <span class="status-badge active" id="dash-protection-badge">
+        <span class="status-badge-dot"></span>
+        <span id="dash-protection-badge-text" data-i18n="status_active">ACTIVE PROTECTION</span>
+      </span>
+      <h2 style="font-size: 18px; margin-bottom: 6px;" id="dash-posture-title" data-i18n="posture_protected">On-Device Shield Active</h2>
+      <p style="font-size: 12px; opacity: 0.85; margin-bottom: 14px;" id="dash-posture-desc" data-i18n="posture_desc">
+        Local machine learning is inspecting supported app notifications and manual content in memory. Zero raw messages transmitted.
+      </p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn btn-primary btn-sm" onclick="switchView('scan')" data-i18n="quick_scan_btn">
+          🔍 Scan Link or Message
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="switchView('onboarding')" data-i18n="configure_protection_btn">
+          🛡️ Permission Setup
+        </button>
+      </div>
+    </div>
+
+    <!-- 7 Genuine Event Metric Cards -->
+    <div class="card-title">
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span data-i18n="metrics_section">Safety Report</span>
+    </div>
+
+    <div class="metrics-grid">
+      <!-- 1. Messages Checked -->
+      <div class="metric-card" onclick="switchView('history')">
+        <div class="metric-label" data-i18n="metric_messages_checked">Messages Checked</div>
+        <div class="metric-value" id="card-messages-checked">0</div>
+        <div class="metric-sub" data-i18n="metric_messages_sub">Checked on your phone</div>
+      </div>
+
+      <!-- 2. Possible Scams Found -->
+      <div class="metric-card card-warning" onclick="switchView('history')">
+        <div class="metric-label" data-i18n="metric_scams_found">Possible Scams Found</div>
+        <div class="metric-value" id="card-scams-found" style="color: var(--warning-amber);">0</div>
+        <div class="metric-sub" data-i18n="metric_scams_sub">Fraud & trick attempts</div>
+      </div>
+
+      <!-- 3. Phishing Messages Found -->
+      <div class="metric-card card-danger" onclick="switchView('history')">
+        <div class="metric-label" data-i18n="metric_phishing_found">Phishing Messages Found</div>
+        <div class="metric-value" id="card-phishing-found" style="color: var(--danger-red);">0</div>
+        <div class="metric-sub" data-i18n="metric_phishing_sub">Password & bank theft</div>
+      </div>
+
+      <!-- 4. Normal Messages -->
+      <div class="metric-card card-safe" onclick="switchView('history')">
+        <div class="metric-label" data-i18n="metric_normal_messages">Normal Messages</div>
+        <div class="metric-value" id="card-normal-messages" style="color: var(--safe-green);">0</div>
+        <div class="metric-sub" data-i18n="metric_normal_sub">No obvious warning signs</div>
+      </div>
+
+      <!-- 5. High-Risk Alerts -->
+      <div class="metric-card card-danger" onclick="switchView('history')">
+        <div class="metric-label" data-i18n="metric_high_risk">High-Risk Alerts</div>
+        <div class="metric-value" id="card-high-risk" style="color: var(--danger-red);">0</div>
+        <div class="metric-sub" data-i18n="metric_high_risk_sub">Urgent warnings shown</div>
+      </div>
+
+      <!-- 6. Blocked Attempts -->
+      <div class="metric-card card-safe" onclick="switchView('admin')">
+        <div class="metric-label" data-i18n="metric_blocked">Blocked Attempts</div>
+        <div class="metric-value" id="card-blocked-attempts" style="color: var(--safe-green);">0</div>
+        <div class="metric-sub" data-i18n="metric_blocked_sub">Protected operations</div>
+      </div>
+    </div>
+
+    <!-- 7. Protection Status Card -->
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;" data-i18n="card_protection_status">Protection Status</div>
+        <div style="font-size: 16px; font-weight: 800; color: var(--teal-accent); margin-top: 2px;" id="card-protection-status">Live Protection</div>
+        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;" id="card-last-scan">Last scan: None recorded yet</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="triggerDeviceSetupModal(true)" data-i18n="device_id_badge">
+        Device ID
+      </button>
+    </div>
+
+    <!-- Recent Security Alerts -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div class="card-title" style="margin-bottom: 0;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span data-i18n="recent_activity_title">Recent Security Alerts</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="switchView('history')" data-i18n="view_all_btn">View All</button>
+      </div>
+
+      <div id="dash-recent-list">
+        <!-- Truthful empty state -->
+        <div class="empty-state">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <div style="font-size: 13.5px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;" data-i18n="empty_activity_title">No Security Events Recorded</div>
+          <p style="font-size: 11.5px; color: var(--text-muted);" data-i18n="empty_activity_desc">Perform a scan or receive incoming messages to evaluate risk on-device.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coverage Transparency Scope -->
+    <div class="card" style="border-style: dashed;">
+      <div class="card-title" style="color: var(--teal-accent);">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span data-i18n="coverage_transparency_title">On-Device Privacy & Coverage Scope</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;" data-i18n="coverage_transparency_text">
+        VEYRA inspects notifications from supported apps (SMS, WhatsApp, Banking, Delivery) strictly in volatile device RAM. VEYRA <strong>never</strong> uploads private conversations, contacts, or passwords to external cloud servers.
+      </p>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 2: SCAN CENTRE
+       On-device analysis for URLs, Messages, and Emails
+       ========================================================================== -->
+  <main class="view-container" id="view-scan">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="scan_centre_title">Scan Centre</h1>
+      <p class="view-subtitle" data-i18n="scan_centre_subtitle">Inspect suspicious links, messages, and emails with local ML heuristics</p>
+    </div>
+
+    <div class="card">
+      <!-- Tab Controls -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+        <button class="btn btn-primary btn-sm" id="tab-scan-link" onclick="switchScanTab('link')">🔗 Link Scanner</button>
+        <button class="btn btn-outline btn-sm" id="tab-scan-msg" onclick="switchScanTab('msg')">💬 Message Scanner</button>
+        <button class="btn btn-outline btn-sm" id="tab-scan-email" onclick="switchScanTab('email')">✉️ Email Guard</button>
+      </div>
+
+      <!-- Quick Test Cases for Judges & Evaluators -->
+      <div class="form-group">
+        <label class="form-label" data-i18n="demo_samples_label">Instant Test Cases (Judges & Verification):</label>
+        <div class="chips-container" id="scan-chips">
+          <span class="chip" onclick="loadTestSample('test_a_prize')">Test A — Prize Scam</span>
+          <span class="chip" onclick="loadTestSample('test_b_otp')">Test B — OTP Theft</span>
+          <span class="chip" onclick="loadTestSample('test_c_college')">Test C — Ordinary Message</span>
+          <span class="chip" onclick="loadTestSample('test_d_link')">Test D — Suspicious Link</span>
+          <span class="chip" onclick="loadTestSample('benign_url')">Normal Web Link</span>
+          <span class="chip" onclick="loadTestSample('fake_kyc')">Fake KYC Smishing</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" id="scan-input-label" data-i18n="input_label_content">Content to Analyze:</label>
+        <textarea class="form-textarea" id="scan-input-text" placeholder="Paste link, SMS, WhatsApp message, or email text here..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-primary" onclick="performScan()" id="btn-perform-scan" style="flex: 1;" data-i18n="btn_analyse_content">
+          🛡️ Analyse Content
+        </button>
+        <button class="btn btn-outline" onclick="clearScanInput()" data-i18n="btn_clear">Clear</button>
+      </div>
+
+      <!-- Result Card -->
+      <div id="scan-result-card" style="display: none; margin-top: 18px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <span id="scan-res-badge" class="status-badge active">SAFE</span>
+          <span id="scan-res-score" style="font-size: 13px; font-weight: 700; color: var(--text-secondary);">Risk Score: 0/100</span>
+        </div>
+
+        <h3 id="scan-res-headline" style="font-size: 16px; margin-bottom: 6px;"></h3>
+        <p id="scan-res-explanation" style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;"></p>
+
+        <div class="evidence-box" id="scan-evidence-box">
+          <strong style="font-size: 12px; display: block; margin-bottom: 6px;" data-i18n="evidence_heading">Identified Threat Indicators:</strong>
+          <ul class="evidence-list" id="scan-evidence-list"></ul>
+        </div>
+
+        <div style="background: var(--bg-secondary); padding: 12px; border-radius: var(--radius-sm); margin-top: 12px;">
+          <strong style="font-size: 12px; color: var(--teal-accent); display: block; margin-bottom: 4px;" data-i18n="rec_action_heading">Recommended Action:</strong>
+          <p id="scan-res-action" style="font-size: 12px; color: var(--text-primary);"></p>
+        </div>
+
+        <!-- Email Non-blocking Notice (conditional) -->
+        <div id="scan-email-notice" style="display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning-amber); padding: 10px; border-radius: var(--radius-sm); margin-top: 10px; font-size: 11.5px; color: var(--warning-amber);">
+          ⚠️ <strong>Mailbox Notice:</strong> VEYRA does not block incoming emails from Gmail or your mail provider. Only local threat warnings and user recommendations are provided.
+        </div>
+
+        <p id="scan-res-meta" style="font-size: 10.5px; color: var(--text-muted); margin-top: 10px;"></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 3: THREAT HISTORY & ACTIVITY LOG
+       Filterable, persistent sanitized metadata
+       ========================================================================== -->
+  <main class="view-container" id="view-history">
+    <div class="view-header">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h1 class="view-title" data-i18n="history_title">Threat History</h1>
+          <p class="view-subtitle" data-i18n="history_subtitle">Persisted on-device detection records & security audit trail</p>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="promptClearHistory()" data-i18n="btn_clear_history" style="color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3);">
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterHistory('all')" id="flt-all" data-i18n="filter_all">All</button>
+      <button class="filter-btn" onclick="filterHistory('safe')" id="flt-safe" data-i18n="filter_safe">Safe</button>
+      <button class="filter-btn" onclick="filterHistory('suspicious')" id="flt-suspicious" data-i18n="filter_suspicious">Suspicious</button>
+      <button class="filter-btn" onclick="filterHistory('high_risk')" id="flt-high_risk" data-i18n="filter_high_risk">High Risk</button>
+      <button class="filter-btn" onclick="filterHistory('phishing')" id="flt-phishing" data-i18n="filter_phishing">Phishing</button>
+      <button class="filter-btn" onclick="filterHistory('messages')" id="flt-messages" data-i18n="filter_messages">Messages</button>
+      <button class="filter-btn" onclick="filterHistory('blocked')" id="flt-blocked" data-i18n="filter_blocked">Access Denied</button>
+    </div>
+
+    <!-- History List -->
+    <div id="history-items-container"></div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 4: PERMISSION & DEVICE SETUP (ONBOARDING)
+       Dedicated setup and permission management
+       ========================================================================== -->
+  <main class="view-container" id="view-onboarding">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="onboarding_title">Device & Permissions Setup</h1>
+      <p class="view-subtitle" data-i18n="onboarding_subtitle">Configure real on-device security capabilities and verified permissions</p>
+    </div>
+
+    <!-- Device Details Card -->
+    <div class="card" style="border-left: 4px solid var(--teal-accent);">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span data-i18n="device_identity_title">Device Identity & Registration</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; margin-bottom: 12px;">
+        <div>
+          <span style="color: var(--text-muted); display: block;" data-i18n="lbl_device_name">Device:</span>
+          <strong id="onboard-dev-name" style="color: var(--text-primary);">Android Device</strong>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block;" data-i18n="lbl_install_id">Installation ID:</span>
+          <strong id="onboard-install-id" style="color: var(--teal-accent); font-family: monospace;">VYR-XXXXXXXX</strong>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block;" data-i18n="lbl_app_version">App Version:</span>
+          <strong id="onboard-version" style="color: var(--text-primary);">1.0.0</strong>
+        </div>
+        <div>
+          <span style="color: var(--text-muted); display: block;" data-i18n="lbl_registration">Registration:</span>
+          <strong id="onboard-reg-status" style="color: var(--safe-green);">Saved Locally</strong>
+        </div>
+      </div>
+      <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4;" data-i18n="device_privacy_note">
+        Your random installation ID is generated and stored locally. Sensitive device identifiers (IMEI, phone numbers, contacts) are never collected.
+      </p>
+    </div>
+
+    <!-- Implemented Permissions List -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <span data-i18n="perm_section_title">Capability & Permission Status</span>
+      </div>
+
+      <!-- A. Notification Access -->
+      <div class="perm-item">
+        <div class="perm-info">
+          <div class="perm-title">
+            <span data-i18n="perm_notif_access_title">Notification Access</span>
+            <span class="perm-badge required" id="badge-perm-notif-access">PERMISSION REQUIRED</span>
+          </div>
+          <p class="perm-desc" data-i18n="perm_notif_access_desc">
+            Analyse relevant content exposed by supported application notifications, subject to Android restrictions and user consent.
+          </p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="openAndroidNotificationSettings()" id="btn-enable-notif" data-i18n="btn_enable_access">
+          Enable Access
+        </button>
+      </div>
+
+      <!-- B. Notification Permission -->
+      <div class="perm-item">
+        <div class="perm-info">
+          <div class="perm-title">
+            <span data-i18n="perm_notif_post_title">Security Notification Channel</span>
+            <span class="perm-badge enabled" id="badge-perm-notif-post">ENABLED</span>
+          </div>
+          <p class="perm-desc" data-i18n="perm_notif_post_desc">
+            Display VEYRA's high-risk threat alerts and contextual warnings when suspicious activity is detected.
+          </p>
+        </div>
+      </div>
+
+      <!-- C. Live SMS Scam Check -->
+      <div class="perm-item">
+        <div class="perm-info">
+          <div class="perm-title">
+            <span data-i18n="perm_sms_title">Live SMS Scam Check</span>
+            <span class="perm-badge required" id="badge-perm-sms">ALLOW ACCESS</span>
+          </div>
+          <p class="perm-desc" data-i18n="perm_sms_desc">
+            Check incoming SMS messages on your phone to detect scams, fake rewards, and dangerous links. Your messages stay 100% private and are checked on your phone.
+          </p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="requestSmsPermission()" id="btn-enable-sms" data-i18n="btn_allow_access">
+          Allow Access
+        </button>
+      </div>
+
+      <!-- D. Dangerous Link Checking -->
+      <div class="perm-item">
+        <div class="perm-info">
+          <div class="perm-title">
+            <span data-i18n="perm_link_title">Dangerous Link Check</span>
+            <span class="perm-badge enabled" id="badge-perm-link">ENABLED</span>
+          </div>
+          <p class="perm-desc" data-i18n="perm_link_desc">
+            Check links and web addresses with on-device heuristics and lookalike detection.
+          </p>
+        </div>
+      </div>
+
+      <!-- E. Email Guard -->
+      <div class="perm-item">
+        <div class="perm-info">
+          <div class="perm-title">
+            <span data-i18n="perm_email_title">Email Guard</span>
+            <span class="perm-badge not-configured" id="badge-perm-email">CHECKED ON PHONE</span>
+          </div>
+          <p class="perm-desc" data-i18n="perm_email_desc">
+            Check email text when shared. Provider-level mailbox blocking is not available.
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; text-align: center;">
+        <button class="btn btn-outline btn-full btn-sm" onclick="openAppDetailsSettings()" data-i18n="btn_open_app_settings">
+          ⚙️ Open Android App Settings
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 5: SAFETY CHECKUP
+       Device security posture audit
+       ========================================================================== -->
+  <main class="view-container" id="view-checkup">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="checkup_title">Safety Checkup</h1>
+      <p class="view-subtitle" data-i18n="checkup_subtitle">Audit baseline Android operating system hygiene and security settings</p>
+    </div>
+
+    <div class="card" style="text-align: center; padding: 22px;">
+      <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted);" data-i18n="checkup_overall_label">Overall Hygiene Score</span>
+      <h1 id="checkup-score-val" style="font-size: 46px; font-weight: 800; color: var(--teal-accent); margin: 6px 0;">--%</h1>
+      <p id="checkup-summary-text" style="font-size: 12.5px; color: var(--text-secondary);"></p>
+      <button class="btn btn-primary btn-sm" onclick="runCheckupAudit()" style="margin-top: 12px;" data-i18n="btn_recheck">
+        Audit Device Now
+      </button>
+    </div>
+
+    <div id="checkup-items-list"></div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 6: INCIDENT RECOVERY
+       Helpline 1930 & Containment Playbooks
+       ========================================================================== -->
+  <main class="view-container" id="view-recovery">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="recovery_title">Incident Recovery</h1>
+      <p class="view-subtitle" data-i18n="recovery_subtitle">Immediate containment steps and official emergency reporting</p>
+    </div>
+
+    <!-- 1930 Helpline Emergency Banner -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(185, 28, 28, 0.15)); border: 1px solid var(--danger-red);">
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 30px;">📞</span>
+        <div>
+          <strong style="color: #FFF; font-size: 15px;" data-i18n="helpline_title">National Cybercrime Helpline: 1930</strong>
+          <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;" data-i18n="helpline_desc">
+            Immediate financial fraud golden hour reporting (cybercrime.gov.in / I4C CFCFRMS protocol)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Triage Categories -->
+    <div class="card-title" data-i18n="triage_prompt">Select what occurred:</div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+      <div class="card" style="margin-bottom: 0; cursor: pointer;" onclick="loadIncidentAdvice('payment_made')">
+        <strong style="color: var(--danger-red); font-size: 13.5px;" data-i18n="inc_payment">💸 I made a fraudulent payment or transferred money</strong>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">CFCFRMS bank freeze protocol & 1930 reporting</p>
+      </div>
+      <div class="card" style="margin-bottom: 0; cursor: pointer;" onclick="loadIncidentAdvice('shared_otp')">
+        <strong style="color: var(--warning-amber); font-size: 13.5px;" data-i18n="inc_otp">🔑 I shared an OTP or verification passcode</strong>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Session revocation & credential change steps</p>
+      </div>
+      <div class="card" style="margin-bottom: 0; cursor: pointer;" onclick="loadIncidentAdvice('shared_bank')">
+        <strong style="color: var(--warning-amber); font-size: 13.5px;" data-i18n="inc_card">💳 I shared card, netbanking, or UPI details</strong>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Card freezing & UPI MPIN reset</p>
+      </div>
+      <div class="card" style="margin-bottom: 0; cursor: pointer;" onclick="loadIncidentAdvice('installed_apk')">
+        <strong style="color: var(--text-primary); font-size: 13.5px;" data-i18n="inc_apk">📱 I installed a suspicious APK or third-party app</strong>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Android Safe Mode isolation & malware removal</p>
+      </div>
+    </div>
+
+    <!-- Incident Advice Output -->
+    <div id="incident-output-card" class="card" style="display: none; border-left: 4px solid var(--danger-red);">
+      <h3 id="inc-output-title" style="font-size: 16px; margin-bottom: 6px;"></h3>
+      <span class="status-badge warning" id="inc-output-urgency" style="margin-bottom: 10px;">HIGH URGENCY</span>
+      <ol id="inc-output-steps" style="padding-left: 18px; font-size: 13px; line-height: 1.6; color: var(--text-primary); margin-bottom: 12px;"></ol>
+      <p id="inc-output-helpline" style="font-size: 12px; font-weight: 700; color: var(--teal-accent);"></p>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 7: ADMIN PORTAL
+       Authenticated Operations Center, device registry, access denial logs
+       ========================================================================== -->
+  <main class="view-container" id="view-admin">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="admin_title">Admin Portal</h1>
+      <p class="view-subtitle" data-i18n="admin_subtitle">Secure administrative operations, device registry & telemetry</p>
+    </div>
+
+    <!-- Admin Login Card (when unauthenticated) -->
+    <div id="admin-login-card" class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span data-i18n="admin_auth_title">Administrator Authentication</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;" data-i18n="admin_auth_note">
+        Administrative telemetry requires authorization. Sign in with the provisioned administrator account. Unauthorized access attempts are rejected and logged.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="lbl_admin_user">Admin Username</label>
+        <input type="text" id="admin-user-input" class="form-input" placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="lbl_admin_pass">Password</label>
+        <input type="password" id="admin-pass-input" class="form-input" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary btn-full" onclick="performAdminLogin()" data-i18n="btn_admin_signin">
+        Sign In as Administrator
+      </button>
+
+      <!-- Provisioning Accordion -->
+      <details style="margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+        <summary style="font-size: 11.5px; color: var(--teal-accent); cursor: pointer;" data-i18n="provision_summary">
+          Provision Authorized Admin Account
+        </summary>
+        <div style="margin-top: 10px;">
+          <div class="form-group">
+            <input type="text" id="prov-user" class="form-input" placeholder="New Admin Username">
+          </div>
+          <div class="form-group">
+            <input type="password" id="prov-pass" class="form-input" placeholder="New Password">
+          </div>
+          <div class="form-group">
+            <input type="text" id="prov-token" class="form-input" placeholder="Setup Key (e.g. VEYRA-ADMIN-SETUP-2026)">
+          </div>
+          <button class="btn btn-outline btn-full btn-sm" onclick="performAdminProvision()" data-i18n="btn_register_admin">
+            Register Authorized Admin
+          </button>
+        </div>
+      </details>
+    </div>
+
+    <!-- Authenticated Dashboard Area -->
+    <div id="admin-dashboard-area" style="display: none;">
+      <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span class="status-badge active" style="margin-bottom: 4px;">AUTHENTICATED ADMIN</span>
+          <h3 style="font-size: 16px;" id="admin-logged-name">Security Operations Center</h3>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="performAdminLogout()" data-i18n="btn_logout">Logout</button>
+      </div>
+
+      <!-- Connected Devices Table -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <span data-i18n="connected_devices_title">Connected Devices Registry</span>
+        </div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-color); text-align: left; color: var(--text-muted);">
+                <th style="padding: 6px 8px;">Installation ID</th>
+                <th style="padding: 6px 8px;">Device Name</th>
+                <th style="padding: 6px 8px;">Platform</th>
+                <th style="padding: 6px 8px;">Version</th>
+                <th style="padding: 6px 8px;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-devices-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Access Denial / Security Audit Log -->
+      <div class="card">
+        <div class="card-title" style="color: var(--danger-red);">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span data-i18n="access_denial_title">Access Denial & Audit Events</span>
+        </div>
+        <p style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+          Records rejected access attempts, unauthorized API calls, and administrative enforcement.
+        </p>
+        <div id="admin-access-logs-list" style="font-family: monospace; font-size: 11px;"></div>
+      </div>
+
+      <!-- Verified Machine Learning Model Benchmarks -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span data-i18n="benchmarks_title">Verified On-Device ML Benchmarks</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+          • <strong>Text Hybrid Classifier:</strong> 98.31% Accuracy | 95.92% Precision | 0.62% False Positive Rate<br>
+          • <strong>URL Feature Classifier:</strong> 89.98% Accuracy | 88.94% Precision (GregaVrbancic 88k dataset)<br>
+          • <strong>On-Device Latency:</strong> &lt; 5 ms inference execution<br>
+          • <strong>Architecture:</strong> Fully offline on-device CPU execution
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       VIEW 8: SETTINGS & PRIVACY
+       Appearance, Language, Permissions, Notifications, Privacy, About
+       ========================================================================== -->
+  <main class="view-container" id="view-settings">
+    <div class="view-header">
+      <h1 class="view-title" data-i18n="settings_title">Settings</h1>
+      <p class="view-subtitle" data-i18n="settings_subtitle">Customise appearance, notification alerts, and privacy preferences</p>
+    </div>
+
+    <!-- Appearance Section -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        <span data-i18n="sec_appearance">Appearance</span>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="lbl_dark_mode">Dark Theme</div>
+          <div class="setting-desc" data-i18n="desc_dark_mode">Deep navy cybersecurity styling</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="toggleTheme()" id="settings-theme-btn">
+          Toggle
+        </button>
+      </div>
+    </div>
+
+    <!-- Protection & Alerts Section -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span data-i18n="sec_notifications">Live Protection & Alerts</span>
+      </div>
+
+      <!-- Live SMS Protection Toggle -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="setting_sms_protection">Live SMS Scam Check</div>
+          <div class="setting-desc" data-i18n="setting_sms_desc">Check incoming SMS messages on your phone for scams</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-sms-protection" checked onchange="toggleSmsProtectionSetting()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Android App Settings -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="setting_android_settings">Android App Settings</div>
+          <div class="setting-desc" data-i18n="setting_android_desc">Open Android Settings to grant or change permissions</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="openAppDetailsSettings()" data-i18n="btn_open">
+          Open Settings
+        </button>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="notif_security">Security Alerts</div>
+          <div class="setting-desc" data-i18n="notif_security_desc">Receive in-app alerts for security detections</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notif-security" checked onchange="saveNotificationPreferences()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="notif_high_risk">High-Risk Alerts</div>
+          <div class="setting-desc" data-i18n="notif_high_risk_desc">System popup notifications for dangerous threats</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notif-high-risk" checked onchange="saveNotificationPreferences()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="notif_suspicious_link">Suspicious Link Alerts</div>
+          <div class="setting-desc" data-i18n="notif_link_desc">Alert when deceptive or lookalike URLs detected</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notif-link" checked onchange="saveNotificationPreferences()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="notif_suspicious_msg">Suspicious Message Alerts</div>
+          <div class="setting-desc" data-i18n="notif_msg_desc">Alert when OTP lures or urgent scams found</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notif-msg" checked onchange="saveNotificationPreferences()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="notif_perm_warnings">Permission Warnings</div>
+          <div class="setting-desc" data-i18n="notif_perm_desc">Notify if protection access is disabled</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notif-perm" checked onchange="saveNotificationPreferences()">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label" data-i18n="notif_sound">Notification Sound</div>
+          <div class="setting-desc" data-i18n="notif_sound_desc">Play audio cue on high-risk detection</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notif-sound" checked onchange="saveNotificationPreferences()">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Privacy & Local Storage Section -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <span data-i18n="sec_privacy">Privacy & Local Storage</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;" data-i18n="privacy_desc">
+        • <strong>Zero Telemetry Exfiltration:</strong> Content stays strictly on your physical Android device.<br>
+        • <strong>Sanitized History Only:</strong> Passwords, OTPs, and private messages are never saved.<br>
+        • <strong>Local Database:</strong> SQLite database (<code style="color: var(--teal-accent);">veyra_secure.db</code>).
+      </p>
+      <button class="btn btn-outline btn-sm" onclick="promptClearHistory()" style="color: var(--danger-red); border-color: rgba(239, 68, 68, 0.3);" data-i18n="btn_clear_scan_history">
+        Clear Local Scan History
+      </button>
+    </div>
+
+    <!-- About VEYRA Section -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span data-i18n="sec_about">About VEYRA</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+        <img src="logo_veyra.png" alt="VEYRA" style="height: 38px; width: auto;">
+        <div>
+          <div style="font-size: 16px; font-weight: 800;">VEYRA</div>
+          <div style="font-size: 11px; color: var(--teal-accent); font-weight: 700;">ON-DEVICE SECURITY</div>
+        </div>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+        Version: 1.0.0 (On-Device Release)<br>
+        Engine: Veyra-Hybrid-v1.2.0-Mobile<br>
+        Privacy-First Real-Time Android Security Assistant
+      </p>
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       SMART SECURITY POP-UPS & CONTEXTUAL DIALOGS
+       ========================================================================== -->
+
+  <!-- POP-UP A: DANGEROUS LINK ALERT -->
+  <div class="modal-overlay" id="popup-dangerous-link">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-tag" style="color: var(--danger-red);">VEYRA SECURITY ALERT</span>
+        <span class="status-badge danger">HIGH RISK</span>
+      </div>
+      <h2 class="modal-heading" data-i18n="pop_link_heading">This Link May Be Dangerous!</h2>
+      <p class="modal-body" data-i18n="pop_link_body">
+        Our security engine detected suspicious indicators associated with this link.
+      </p>
+      <div class="evidence-box danger">
+        <strong style="font-size: 11.5px; display: block; margin-bottom: 4px;" data-i18n="lbl_reasons">Detection Reasons:</strong>
+        <ul class="evidence-list" id="popup-link-reasons"></ul>
+      </div>
+      <div style="background: var(--bg-secondary); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12px;">
+        <strong style="color: var(--teal-accent);" data-i18n="lbl_rec_action">Recommended Action:</strong>
+        <p style="margin-top: 2px;" data-i18n="pop_link_rec">Do not open the link or enter personal information.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closePopup('popup-dangerous-link')" data-i18n="btn_dismiss">Dismiss</button>
+        <button class="btn btn-primary btn-sm" onclick="switchView('history'); closePopup('popup-dangerous-link');" data-i18n="btn_threat_details">View Threat Details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP B: SUSPICIOUS MESSAGE ALERT -->
+  <div class="modal-overlay" id="popup-suspicious-message">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-tag" style="color: var(--warning-amber);">VEYRA MESSAGE GUARD</span>
+        <span class="status-badge warning">SUSPICIOUS</span>
+      </div>
+      <h2 class="modal-heading" data-i18n="pop_msg_heading">Suspicious Message Detected!</h2>
+      <p class="modal-body" data-i18n="pop_msg_body">
+        Our on-device scanner detected deceptive patterns commonly used in financial fraud and credential theft.
+      </p>
+      <div class="evidence-box warning">
+        <strong style="font-size: 11.5px; display: block; margin-bottom: 4px;" data-i18n="lbl_reasons">Detection Reasons:</strong>
+        <ul class="evidence-list" id="popup-msg-reasons"></ul>
+      </div>
+      <div style="background: var(--bg-secondary); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12px;">
+        <strong style="color: var(--teal-accent);" data-i18n="lbl_rec_action">Recommended Action:</strong>
+        <p style="margin-top: 2px;" data-i18n="pop_msg_rec">Do not share OTPs, passwords, or banking information.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closePopup('popup-suspicious-message')" data-i18n="btn_dismiss">Dismiss</button>
+        <button class="btn btn-primary btn-sm" onclick="switchView('scan'); closePopup('popup-suspicious-message');" data-i18n="btn_analyse_details">Analyse Details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP C: SUSPICIOUS EMAIL ALERT -->
+  <div class="modal-overlay" id="popup-suspicious-email">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-tag" style="color: var(--warning-amber);">VEYRA EMAIL GUARD</span>
+        <span class="status-badge warning">POTENTIAL PHISHING</span>
+      </div>
+      <h2 class="modal-heading" data-i18n="pop_email_heading">Potential Phishing Email Detected!</h2>
+      <p class="modal-body" data-i18n="pop_email_body">
+        Indicators of sender spoofing or credential requests were found in the analysed email.
+      </p>
+      <div class="evidence-box warning">
+        <strong style="font-size: 11.5px; display: block; margin-bottom: 4px;" data-i18n="lbl_reasons">Detection Reasons:</strong>
+        <ul class="evidence-list" id="popup-email-reasons"></ul>
+      </div>
+      <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid var(--warning-amber); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 12px; font-size: 11.5px; color: var(--warning-amber);">
+        ℹ️ <strong>Status:</strong> The email itself has not been blocked in your email app.
+      </div>
+      <div style="background: var(--bg-secondary); padding: 10px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12px;">
+        <strong style="color: var(--teal-accent);" data-i18n="lbl_rec_action">Recommended Action:</strong>
+        <p style="margin-top: 2px;" data-i18n="pop_email_rec">Verify the sender before opening links or sharing information.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closePopup('popup-suspicious-email')" data-i18n="btn_dismiss">Dismiss</button>
+        <button class="btn btn-primary btn-sm" onclick="switchView('scan'); closePopup('popup-suspicious-email');" data-i18n="btn_view_analysis">View Analysis</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP D: UNAUTHORISED ACCESS ALERT -->
+  <div class="modal-overlay" id="popup-unauthorized-access">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-tag" style="color: var(--danger-red);">VEYRA ACCESS GUARD</span>
+        <span class="status-badge danger">ACCESS DENIED</span>
+      </div>
+      <h2 class="modal-heading" data-i18n="pop_access_heading">Unauthorised Access Attempt Detected!</h2>
+      <p class="modal-body" data-i18n="pop_access_body">
+        An unauthenticated request targeted a protected VEYRA administrative resource.
+      </p>
+      <div class="evidence-box danger">
+        <div style="font-size: 12px; margin-bottom: 4px;"><strong>Target Resource:</strong> <span id="popup-access-resource">ADMIN_PORTAL</span></div>
+        <div style="font-size: 12px; margin-bottom: 4px;"><strong>Enforcement Action:</strong> <span style="color: var(--danger-red); font-weight: 700;">ACCESS DENIED (403)</span></div>
+        <div style="font-size: 12px;"><strong>Event Timestamp:</strong> <span id="popup-access-time">Just now</span></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closePopup('popup-unauthorized-access')" data-i18n="btn_dismiss">Dismiss</button>
+        <button class="btn btn-primary btn-sm" onclick="switchView('admin'); closePopup('popup-unauthorized-access');" data-i18n="btn_view_sec_event">View Security Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP E: SAFE SCAN RESULT -->
+  <div class="modal-overlay" id="popup-safe-scan">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-tag" style="color: var(--safe-green);">Scan Completed</span>
+        <span class="status-badge active">SAFE</span>
+      </div>
+      <h2 class="modal-heading" data-i18n="pop_safe_heading">No Known Threats Detected</h2>
+      <p class="modal-body" data-i18n="pop_safe_body">
+        The scanned content did not trigger any configured phishing, smishing, or brand impersonation rules.
+      </p>
+      <div class="evidence-box safe">
+        <p style="font-size: 12px; color: var(--safe-green);" data-i18n="pop_safe_note">
+          Passed deterministic heuristic checks and on-device hybrid ML classification.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-sm" onclick="closePopup('popup-safe-scan')" data-i18n="btn_view_report">View Scan Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP F: PERMISSION DISABLED ALERT -->
+  <div class="modal-overlay" id="popup-permission-disabled">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-tag" style="color: var(--warning-amber);">Protection Posture</span>
+        <span class="status-badge warning">ATTENTION</span>
+      </div>
+      <h2 class="modal-heading" data-i18n="pop_perm_heading">Your Protection Needs Attention</h2>
+      <p class="modal-body" id="popup-perm-msg" data-i18n="pop_perm_body">
+        Notification Access is disabled. Real-time background detection of scam messages and suspicious links is currently inactive.
+      </p>
+      <div class="modal-footer">
+        <button class="btn btn-outline btn-sm" onclick="closePopup('popup-permission-disabled')" data-i18n="btn_dismiss">Dismiss</button>
+        <button class="btn btn-primary btn-sm" onclick="openAndroidNotificationSettings(); closePopup('popup-permission-disabled');" data-i18n="btn_enable_access">Enable Access</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POP-UP G: FIRST-LAUNCH DEVICE SETUP & WELCOME MODAL -->
+  <div class="modal-overlay" id="popup-device-setup">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <img src="logo_veyra.png" alt="VEYRA" style="height: 28px; width: auto;">
+          <span class="brand-name" style="font-size: 16px;">VEYRA</span>
+        </div>
+        <span class="status-badge active" style="font-size: 10px;">ON-DEVICE</span>
+      </div>
+
+      <h2 class="modal-heading" style="color: var(--teal-accent); font-size: 20px;" data-i18n="welcome_title">Your Privacy Matters.</h2>
+      <p class="modal-body" style="margin-bottom: 14px;" data-i18n="welcome_desc">
+        Protect yourself from suspicious links, phishing attempts, and scam messages with 100% on-device security.
+      </p>
+
+      <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px; font-size: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div><span style="color: var(--text-muted);">Device:</span> <strong id="setup-modal-dev" style="color: var(--text-primary);">Android Device</strong></div>
+          <div><span style="color: var(--text-muted);">App Version:</span> <strong style="color: var(--text-primary);">1.0.0</strong></div>
+          <div style="grid-column: span 2;"><span style="color: var(--text-muted);">Installation ID:</span> <strong id="setup-modal-id" style="color: var(--teal-accent); font-family: monospace;">VYR-XXXXXXXX</strong></div>
+          <div style="grid-column: span 2;"><span style="color: var(--text-muted);">Registration:</span> <strong id="setup-modal-status" style="color: var(--safe-green);">Saved Locally</strong></div>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn btn-primary btn-full" onclick="finishDeviceSetup(true)" data-i18n="btn_setup_protection">
+          🛡️ Set Up Protection
+        </button>
+        <button class="btn btn-outline btn-full btn-sm" onclick="finishDeviceSetup(false)" data-i18n="btn_continue_no_login">
+          Continue Without Login
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       BOTTOM NAVIGATION BAR
+       5 Clear Touch Destinations + Settings
+       ========================================================================== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-btn-dashboard" onclick="switchView('dashboard')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      <span data-i18n="nav_home">Home</span>
+    </button>
+    <button class="nav-item" id="nav-btn-scan" onclick="switchView('scan')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <span data-i18n="nav_scan">Scan</span>
+    </button>
+    <button class="nav-item" id="nav-btn-history" onclick="switchView('history')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      <span data-i18n="nav_activity">Activity</span>
+    </button>
+    <button class="nav-item" id="nav-btn-onboarding" onclick="switchView('onboarding')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      <span data-i18n="nav_shield">Shield</span>
+    </button>
+    <button class="nav-item" id="nav-btn-recovery" onclick="switchView('recovery')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      <span data-i18n="nav_help">Help</span>
+    </button>
+    <button class="nav-item" id="nav-btn-settings" onclick="switchView('settings')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span data-i18n="nav_settings">Settings</span>
+    </button>
+  </nav>
+
+  <!-- Controller Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
